@@ -6,3 +6,10 @@ server:
 spring:
   application:
     name: payment
+  main:
+    allow-bean-definition-overriding: true
+    jackson:
+      serialization:
+        FAIL_ON_EMPTY_BEANS: false
+      profiles:
+        active: ${PROFILE}
