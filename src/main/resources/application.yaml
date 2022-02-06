@@ -1,0 +1,8 @@
+server:
+  port: 8666
+  error:
+    include-message: ALWAYS
+
+spring:
+  application:
+    name: payment
