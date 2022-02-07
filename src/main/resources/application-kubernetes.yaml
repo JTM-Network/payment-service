@@ -10,3 +10,8 @@ stripe:
 
 paypal:
   api-key: ${PAYPAL_API_KEY}
+
+hosts:
+  profile:
+    url: ${PROFILE_HOST}
+    port: ${PROFILE_PORT}

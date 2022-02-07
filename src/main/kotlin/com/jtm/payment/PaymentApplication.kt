@@ -6,7 +6,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient
 
 @EnableDiscoveryClient
 @SpringBootApplication
-class PaymentApplication
+open class PaymentApplication
 
 fun main(args: Array<String>) {
     runApplication<PaymentApplication>(*args)
