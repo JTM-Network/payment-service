@@ -6,7 +6,8 @@ import com.jtm.payment.core.domain.exceptions.ClientIdNotFound
 import com.jtm.payment.core.domain.exceptions.FailedCustomerCreation
 import com.jtm.payment.core.domain.exceptions.PaymentProfileFound
 import com.jtm.payment.core.domain.exceptions.PaymentProfileNotFound
-import com.jtm.payment.core.usecase.provider.StripeProvider
+import com.jtm.payment.core.usecase.provider.StripeCustomerProvider
+import com.jtm.payment.core.usecase.provider.StripePaymentProvider
 import com.jtm.payment.core.usecase.repository.PaymentProfileRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -26,8 +27,8 @@ import reactor.test.StepVerifier
 class ProfileServiceTest {
 
     private val profileRepository: PaymentProfileRepository = mock()
-    private val stripeProvider: StripeProvider = mock()
-    private val profileService = ProfileService(profileRepository, stripeProvider)
+    private val customerProvider: StripeCustomerProvider = mock()
+    private val profileService = ProfileService(profileRepository, customerProvider)
 
     private val profile = PaymentProfile("test", "stripeId")
     private val infoDto = BasicInfoDto("13 Test road", "", "London", "UK", null, "BR1")
@@ -80,7 +81,7 @@ class ProfileServiceTest {
     @Test
     fun createProfile_thenFailedCustomerCreation() {
         `when`(profileRepository.findById(anyString())).thenReturn(Mono.empty())
-        `when`(stripeProvider.createCustomer(anyOrNull(), anyString())).thenReturn(null)
+        `when`(customerProvider.createCustomer(anyOrNull(), anyString())).thenReturn(null)
 
         val returned = profileService.createProfile(request, infoDto)
 
@@ -101,7 +102,7 @@ class ProfileServiceTest {
     @Test
     fun createProfile() {
         `when`(profileRepository.findById(anyString())).thenReturn(Mono.empty())
-        `when`(stripeProvider.createCustomer(anyOrNull(), anyString())).thenReturn("stripeId")
+        `when`(customerProvider.createCustomer(anyOrNull(), anyString())).thenReturn("stripeId")
         `when`(profileRepository.save(anyOrNull())).thenReturn(Mono.just(profile))
 
         val returned = profileService.createProfile(request, infoDto)

@@ -16,14 +16,9 @@ import java.util.*
 import javax.annotation.PostConstruct
 
 @Component
-class StripeProvider @Autowired constructor(@Value("\${stripe.secret-key}") val secretKey: String) {
+class StripePaymentProvider {
 
-    private val logger = LoggerFactory.getLogger(StripeProvider::class.java)
-
-    @PostConstruct
-    fun init() {
-        Stripe.apiKey = secretKey
-    }
+    private val logger = LoggerFactory.getLogger(StripePaymentProvider::class.java)
 
     fun createPaymentIntent(amount: Double, currency: String, clientId: String, plugins: Array<UUID>): String? {
         return try {
@@ -40,29 +35,5 @@ class StripeProvider @Autowired constructor(@Value("\${stripe.secret-key}") val 
             logger.error("Failed to create payment intent.", ex)
             null
         }
-    }
-
-    fun createCustomer(dto: BasicInfoDto, clientId: String): String? {
-        val addressBuilder = CustomerCreateParams.Address.builder()
-            .setLine1(dto.line1)
-            .setLine1(dto.line2)
-            .setCountry(dto.country)
-            .setCity(dto.city)
-            .setPostalCode(dto.postalCode)
-
-        if (!dto.state.isNullOrEmpty()) addressBuilder.setState(dto.state)
-
-       return try {
-           val params = CustomerCreateParams.builder()
-               .setAddress(addressBuilder.build())
-               .setMetadata(mapOf("clientId" to clientId))
-               .build()
-
-           val customer = Customer.create(params)
-           return customer.id
-       } catch (ex: StripeException) {
-           logger.error("Failed to create customer.", ex)
-           null
-       }
     }
 }

@@ -3,14 +3,14 @@ package com.jtm.payment.data.service
 import com.jtm.payment.core.domain.exceptions.ClientIdNotFound
 import com.jtm.payment.core.domain.exceptions.FailedPaymentIntent
 import com.jtm.payment.core.domain.model.PluginIntent
-import com.jtm.payment.core.usecase.provider.StripeProvider
+import com.jtm.payment.core.usecase.provider.StripePaymentProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 
 @Service
-class MinecraftIntentService @Autowired constructor(private val stripeProvider: StripeProvider) {
+class MinecraftIntentService @Autowired constructor(private val stripeProvider: StripePaymentProvider) {
 
     fun createPluginIntent(request: ServerHttpRequest, intent: PluginIntent): Mono<String> {
         val id = request.headers.getFirst("CLIENT_ID") ?: return Mono.error { ClientIdNotFound() }

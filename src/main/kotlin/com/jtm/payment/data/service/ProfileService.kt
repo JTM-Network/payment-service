@@ -6,7 +6,7 @@ import com.jtm.payment.core.domain.exceptions.ClientIdNotFound
 import com.jtm.payment.core.domain.exceptions.FailedCustomerCreation
 import com.jtm.payment.core.domain.exceptions.PaymentProfileFound
 import com.jtm.payment.core.domain.exceptions.PaymentProfileNotFound
-import com.jtm.payment.core.usecase.provider.StripeProvider
+import com.jtm.payment.core.usecase.provider.StripeCustomerProvider
 import com.jtm.payment.core.usecase.repository.PaymentProfileRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.server.reactive.ServerHttpRequest
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 
 @Service
-class ProfileService @Autowired constructor(private val profileRepository: PaymentProfileRepository, private val stripeProvider: StripeProvider) {
+class ProfileService @Autowired constructor(private val profileRepository: PaymentProfileRepository, private val stripeProvider: StripeCustomerProvider) {
 
     fun createProfile(request: ServerHttpRequest, dto: BasicInfoDto): Mono<PaymentProfile> {
         val id = request.headers.getFirst("CLIENT_ID") ?: return Mono.error { ClientIdNotFound() }

@@ -3,7 +3,7 @@ package com.jtm.payment.data.service
 import com.jtm.payment.core.domain.exceptions.ClientIdNotFound
 import com.jtm.payment.core.domain.exceptions.FailedPaymentIntent
 import com.jtm.payment.core.domain.model.PluginIntent
-import com.jtm.payment.core.usecase.provider.StripeProvider
+import com.jtm.payment.core.usecase.provider.StripePaymentProvider
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -22,7 +22,7 @@ import java.util.*
 @RunWith(SpringRunner::class)
 class MinecraftIntentServiceTest {
 
-    private val stripeProvider: StripeProvider = mock()
+    private val stripeProvider: StripePaymentProvider = mock()
     private val intentService = MinecraftIntentService(stripeProvider)
 
     private val intent = PluginIntent(25.0, "gbp", listOf(UUID.randomUUID()))
