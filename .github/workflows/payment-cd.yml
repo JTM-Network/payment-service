@@ -8,8 +8,8 @@ env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
   GKE_CLUSTER: main-cluster
   GKE_ZONE: europe-west1-b
-  IMAGE: mc-version
-  NAME: mc-version
+  IMAGE: payment
+  NAME: payment
 
 jobs:
   docker-build-publish:
