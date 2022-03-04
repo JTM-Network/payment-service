@@ -41,7 +41,8 @@ class ProfileService @Autowired constructor(private val profileRepository: Payme
     }
 
     fun removeProfile(id: String): Mono<PaymentProfile> {
-        return profileRepository.findById(id)
+        val replaced = id.replace("%40", "|")
+        return profileRepository.findById(replaced)
             .switchIfEmpty(Mono.defer { Mono.error(PaymentProfileNotFound()) })
             .flatMap { profileRepository.delete(it).thenReturn(it) }
     }
