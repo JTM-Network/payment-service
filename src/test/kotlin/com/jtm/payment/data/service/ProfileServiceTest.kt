@@ -1,11 +1,10 @@
 package com.jtm.payment.data.service
 
+import com.google.gson.GsonBuilder
 import com.jtm.payment.core.domain.dto.BasicInfoDto
 import com.jtm.payment.core.domain.entity.PaymentProfile
-import com.jtm.payment.core.domain.exceptions.ClientIdNotFound
-import com.jtm.payment.core.domain.exceptions.FailedCustomerCreation
-import com.jtm.payment.core.domain.exceptions.PaymentProfileFound
-import com.jtm.payment.core.domain.exceptions.PaymentProfileNotFound
+import com.jtm.payment.core.domain.exceptions.*
+import com.jtm.payment.core.domain.model.BasicInfo
 import com.jtm.payment.core.usecase.provider.StripeCustomerProvider
 import com.jtm.payment.core.usecase.provider.StripePaymentProvider
 import com.jtm.payment.core.usecase.repository.PaymentProfileRepository
@@ -35,6 +34,8 @@ class ProfileServiceTest {
     private val request: ServerHttpRequest = mock()
     private val headers: HttpHeaders = mock()
 
+    private val gson = GsonBuilder().create()
+
     @Before
     fun setup() {
         `when`(request.headers).thenReturn(headers)
@@ -59,15 +60,34 @@ class ProfileServiceTest {
     }
 
     @Test
+    fun createProfile_thenClientInfoNotFound() {
+        `when`(headers.getFirst("CLIENT_ID")).thenReturn("Client id")
+        `when`(headers.getFirst("BASIC_INFO")).thenReturn(null)
+
+        val returned = profileService.createProfile(request, infoDto)
+
+        verify(request, times(2)).headers
+        verifyNoMoreInteractions(request)
+
+        verify(headers, times(2)).getFirst(anyString())
+        verifyNoMoreInteractions(headers)
+
+        StepVerifier.create(returned)
+                .expectError(ClientInformationNotFound::class.java)
+                .verify()
+    }
+
+    @Test
     fun createProfile_thenFound() {
+        `when`(headers.getFirst("BASIC_INFO")).thenReturn(gson.toJson(BasicInfo("test", "test", "test@email.com")))
         `when`(profileRepository.findById(anyString())).thenReturn(Mono.just(profile))
 
         val returned = profileService.createProfile(request, infoDto)
 
-        verify(request, times(1)).headers
+        verify(request, times(2)).headers
         verifyNoMoreInteractions(request)
 
-        verify(headers, times(1)).getFirst(anyString())
+        verify(headers, times(2)).getFirst(anyString())
         verifyNoMoreInteractions(headers)
 
         verify(profileRepository, times(1)).findById(anyString())
@@ -80,15 +100,16 @@ class ProfileServiceTest {
 
     @Test
     fun createProfile_thenFailedCustomerCreation() {
+        `when`(headers.getFirst("BASIC_INFO")).thenReturn(gson.toJson(BasicInfo("test", "test", "test@email.com")))
         `when`(profileRepository.findById(anyString())).thenReturn(Mono.empty())
-        `when`(customerProvider.createCustomer(anyOrNull(), anyString())).thenReturn(null)
+        `when`(customerProvider.createCustomer(anyOrNull(), anyOrNull(), anyString())).thenReturn(null)
 
         val returned = profileService.createProfile(request, infoDto)
 
-        verify(request, times(1)).headers
+        verify(request, times(2)).headers
         verifyNoMoreInteractions(request)
 
-        verify(headers, times(1)).getFirst(anyString())
+        verify(headers, times(2)).getFirst(anyString())
         verifyNoMoreInteractions(headers)
 
         verify(profileRepository, times(1)).findById(anyString())
@@ -101,16 +122,17 @@ class ProfileServiceTest {
 
     @Test
     fun createProfile() {
+        `when`(headers.getFirst("BASIC_INFO")).thenReturn(gson.toJson(BasicInfo("test", "test", "test@email.com")))
         `when`(profileRepository.findById(anyString())).thenReturn(Mono.empty())
-        `when`(customerProvider.createCustomer(anyOrNull(), anyString())).thenReturn("stripeId")
+        `when`(customerProvider.createCustomer(anyOrNull(), anyOrNull(), anyString())).thenReturn("stripeId")
         `when`(profileRepository.save(anyOrNull())).thenReturn(Mono.just(profile))
 
         val returned = profileService.createProfile(request, infoDto)
 
-        verify(request, times(1)).headers
+        verify(request, times(2)).headers
         verifyNoMoreInteractions(request)
 
-        verify(headers, times(1)).getFirst(anyString())
+        verify(headers, times(2)).getFirst(anyString())
         verifyNoMoreInteractions(headers)
 
         verify(profileRepository, times(1)).findById(anyString())
@@ -172,6 +194,38 @@ class ProfileServiceTest {
 
         verify(headers, times(1)).getFirst(anyString())
         verifyNoMoreInteractions(headers)
+
+        verify(profileRepository, times(1)).findById(anyString())
+        verifyNoMoreInteractions(profileRepository)
+
+        StepVerifier.create(returned)
+            .assertNext {
+                assertThat(it.id).isEqualTo(profile.id)
+                assertThat(it.stripeId).isEqualTo(profile.stripeId)
+            }
+            .verifyComplete()
+    }
+
+    @Test
+    fun removeProfile_thenNotFound() {
+        `when`(profileRepository.findById(anyString())).thenReturn(Mono.empty())
+
+        val returned = profileService.removeProfile("test")
+
+        verify(profileRepository, times(1)).findById(anyString())
+        verifyNoMoreInteractions(profileRepository)
+
+        StepVerifier.create(returned)
+            .expectError(PaymentProfileNotFound::class.java)
+            .verify()
+    }
+
+    @Test
+    fun removeProfile() {
+        `when`(profileRepository.findById(anyString())).thenReturn(Mono.just(profile))
+        `when`(profileRepository.delete(anyOrNull())).thenReturn(Mono.empty())
+
+        val returned = profileService.removeProfile("test")
 
         verify(profileRepository, times(1)).findById(anyString())
         verifyNoMoreInteractions(profileRepository)

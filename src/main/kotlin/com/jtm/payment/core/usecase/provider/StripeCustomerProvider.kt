@@ -1,6 +1,7 @@
 package com.jtm.payment.core.usecase.provider
 
 import com.jtm.payment.core.domain.dto.BasicInfoDto
+import com.jtm.payment.core.domain.model.BasicInfo
 import com.stripe.exception.StripeException
 import com.stripe.model.Customer
 import com.stripe.param.CustomerCreateParams
@@ -12,7 +13,7 @@ class StripeCustomerProvider {
 
     private val logger = LoggerFactory.getLogger(StripeCustomerProvider::class.java)
 
-    fun createCustomer(dto: BasicInfoDto, clientId: String): String? {
+    fun createCustomer(info: BasicInfo, dto: BasicInfoDto, clientId: String): String? {
         val addressBuilder = CustomerCreateParams.Address.builder()
             .setLine1(dto.line1)
             .setLine1(dto.line2)
@@ -24,9 +25,11 @@ class StripeCustomerProvider {
 
         return try {
             val params = CustomerCreateParams.builder()
-                .setAddress(addressBuilder.build())
-                .setMetadata(mapOf("clientId" to clientId))
-                .build()
+                    .setName("${info.given_name} ${info.family_name}")
+                    .setEmail(info.email)
+                    .setAddress(addressBuilder.build())
+                    .setMetadata(mapOf("clientId" to clientId))
+                    .build()
 
             val customer = Customer.create(params)
             return customer.id

@@ -5,8 +5,7 @@ import com.jtm.payment.core.domain.entity.PaymentProfile
 import com.jtm.payment.data.service.ProfileService
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.times
+import org.mockito.Mockito.*
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
@@ -62,6 +61,22 @@ class ProfileControllerTest {
             .jsonPath("$.stripeId").isEqualTo("stripeId")
 
         verify(profileService, times(1)).getProfile(anyOrNull())
+        verifyNoMoreInteractions(profileService)
+    }
+
+    @Test
+    fun removeProfile() {
+        `when`(profileService.removeProfile(anyString())).thenReturn(Mono.just(profile))
+
+        testClient.delete()
+            .uri("/profile/test")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("$.id").isEqualTo("id")
+            .jsonPath("$.stripeId").isEqualTo("stripeId")
+
+        verify(profileService, times(1)).removeProfile(anyString())
         verifyNoMoreInteractions(profileService)
     }
 }

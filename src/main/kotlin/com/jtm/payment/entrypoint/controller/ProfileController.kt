@@ -21,4 +21,9 @@ class ProfileController @Autowired constructor(private val profileService: Profi
     fun getProfile(request: ServerHttpRequest): Mono<PaymentProfile> {
         return profileService.getProfile(request)
     }
+
+    @DeleteMapping("/{id}")
+    fun deleteProfile(@PathVariable id: String): Mono<PaymentProfile> {
+        return profileService.removeProfile(id)
+    }
 }
