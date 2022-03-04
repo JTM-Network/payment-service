@@ -10,6 +10,7 @@ import com.jtm.payment.core.usecase.repository.PaymentProfileRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Service
@@ -33,6 +34,10 @@ class ProfileService @Autowired constructor(private val profileRepository: Payme
         val id = request.headers.getFirst("CLIENT_ID") ?: return Mono.error { ClientIdNotFound() }
         return profileRepository.findById(id)
             .switchIfEmpty(Mono.defer { Mono.error(PaymentProfileNotFound()) })
+    }
+
+    fun getProfiles(): Flux<PaymentProfile> {
+        return profileRepository.findAll()
     }
 
     fun removeProfile(id: String): Mono<PaymentProfile> {

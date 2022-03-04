@@ -5,6 +5,7 @@ import com.jtm.payment.core.domain.entity.PaymentProfile
 import com.jtm.payment.data.service.ProfileService
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito
 import org.mockito.Mockito.*
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.verify
@@ -15,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.reactive.server.WebTestClient
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @RunWith(SpringRunner::class)
@@ -62,6 +64,22 @@ class ProfileControllerTest {
 
         verify(profileService, times(1)).getProfile(anyOrNull())
         verifyNoMoreInteractions(profileService)
+    }
+
+    @Test
+    fun getProfiles() {
+        `when`(profileService.getProfiles()).thenReturn(Flux.just(profile))
+
+        testClient.get()
+                .uri("/profile/all")
+                .exchange()
+                .expectStatus().isOk
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo("id")
+                .jsonPath("$[0].stripeId").isEqualTo("stripeId")
+
+        verify(profileService, times(1)).getProfiles()
+        Mockito.verifyNoMoreInteractions(profileService)
     }
 
     @Test

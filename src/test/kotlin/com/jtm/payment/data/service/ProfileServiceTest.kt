@@ -19,6 +19,7 @@ import org.mockito.kotlin.verify
 import org.springframework.http.HttpHeaders
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.test.context.junit4.SpringRunner
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 
@@ -204,6 +205,23 @@ class ProfileServiceTest {
                 assertThat(it.stripeId).isEqualTo(profile.stripeId)
             }
             .verifyComplete()
+    }
+
+    @Test
+    fun getProfiles() {
+        `when`(profileRepository.findAll()).thenReturn(Flux.just(profile))
+
+        val returned = profileService.getProfiles()
+
+        verify(profileRepository, times(1)).findAll()
+        verifyNoMoreInteractions(profileRepository)
+
+        StepVerifier.create(returned)
+                .assertNext {
+                    assertThat(it.id).isEqualTo(profile.id)
+                    assertThat(it.stripeId).isEqualTo(profile.stripeId)
+                }
+                .verifyComplete()
     }
 
     @Test

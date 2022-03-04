@@ -6,6 +6,7 @@ import com.jtm.payment.data.service.ProfileService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @RestController
@@ -20,6 +21,11 @@ class ProfileController @Autowired constructor(private val profileService: Profi
     @GetMapping("/me")
     fun getProfile(request: ServerHttpRequest): Mono<PaymentProfile> {
         return profileService.getProfile(request)
+    }
+
+    @GetMapping("/all")
+    fun getProfiles(): Flux<PaymentProfile> {
+        return profileService.getProfiles()
     }
 
     @DeleteMapping("/{id}")
