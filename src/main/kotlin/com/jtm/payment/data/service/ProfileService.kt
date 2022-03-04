@@ -7,6 +7,7 @@ import com.jtm.payment.core.domain.exceptions.*
 import com.jtm.payment.core.domain.model.BasicInfo
 import com.jtm.payment.core.usecase.provider.StripeCustomerProvider
 import com.jtm.payment.core.usecase.repository.PaymentProfileRepository
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.stereotype.Service
@@ -17,6 +18,7 @@ import reactor.core.publisher.Mono
 class ProfileService @Autowired constructor(private val profileRepository: PaymentProfileRepository, private val stripeProvider: StripeCustomerProvider) {
 
     private val gson = GsonBuilder().create()
+    private val logger = LoggerFactory.getLogger(ProfileService::class.java)
 
     fun createProfile(request: ServerHttpRequest, dto: BasicInfoDto): Mono<PaymentProfile> {
         val id = request.headers.getFirst("CLIENT_ID") ?: return Mono.error { ClientIdNotFound() }
@@ -42,6 +44,7 @@ class ProfileService @Autowired constructor(private val profileRepository: Payme
 
     fun removeProfile(id: String): Mono<PaymentProfile> {
         val replaced = id.replace("@", "|")
+        logger.info("Id: $replaced")
         return profileRepository.findById(replaced)
             .switchIfEmpty(Mono.defer { Mono.error(PaymentProfileNotFound()) })
             .flatMap { profileRepository.delete(it).thenReturn(it) }
