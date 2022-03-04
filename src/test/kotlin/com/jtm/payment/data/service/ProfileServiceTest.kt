@@ -30,7 +30,7 @@ class ProfileServiceTest {
     private val customerProvider: StripeCustomerProvider = mock()
     private val profileService = ProfileService(profileRepository, customerProvider)
 
-    private val profile = PaymentProfile("test", "stripeId")
+    private val profile = PaymentProfile("test", "test@gmail.com", "stripeId")
     private val infoDto = BasicInfoDto("13 Test road", "", "London", "UK", null, "BR1")
     private val request: ServerHttpRequest = mock()
     private val headers: HttpHeaders = mock()

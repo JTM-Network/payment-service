@@ -30,7 +30,7 @@ class ProfileControllerTest {
     @MockBean
     lateinit var profileService: ProfileService
 
-    private val profile = PaymentProfile("id", "stripeId")
+    private val profile = PaymentProfile("id", "test@gmail.com","stripeId")
     private val dto = BasicInfoDto("13 Test road", "", "London", "UK", null, "BR1")
 
     @Test
@@ -87,7 +87,7 @@ class ProfileControllerTest {
         `when`(profileService.removeProfile(anyString())).thenReturn(Mono.just(profile))
 
         testClient.delete()
-            .uri("/profile/test")
+            .uri("/profile?id='auth|12313123123132'")
             .exchange()
             .expectStatus().isOk
             .expectBody()

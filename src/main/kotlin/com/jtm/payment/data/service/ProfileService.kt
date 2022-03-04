@@ -26,7 +26,7 @@ class ProfileService @Autowired constructor(private val profileRepository: Payme
             .flatMap<PaymentProfile?> { Mono.error(PaymentProfileFound()) }
             .switchIfEmpty(Mono.defer {
                 val stripeId = stripeProvider.createCustomer(info, dto, id) ?: return@defer Mono.error(FailedCustomerCreation())
-                profileRepository.save(PaymentProfile(id, stripeId))
+                profileRepository.save(PaymentProfile(id, info.email, stripeId))
             })
     }
 
